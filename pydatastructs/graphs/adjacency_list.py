@@ -26,7 +26,7 @@ class AdjacencyList(Graph):
         return obj
 
     @classmethod
-    def methods(self):
+    def methods(cls):
         return ['is_adjacent', 'neighbors',
                 'add_vertex', 'remove_vertex', 'add_edge',
                 'get_edge', 'remove_edge', '__new__']
@@ -68,20 +68,18 @@ class AdjacencyList(Graph):
             raise ValueError(error_msg % (target))
 
         source, target = self.__getattribute__(source), \
-            self.__getattribute__(target)
+                self.__getattribute__(target)
         source.add_adjacent_node(target.name)
         if cost is not None:
-            self.edge_weights[source.name + "_" + target.name] = \
-                GraphEdge(source, target, cost)
+            self.edge_weights[f"{source.name}_{target.name}"] = GraphEdge(
+                source, target, cost
+            )
 
     def get_edge(self, source, target):
-        return self.edge_weights.get(
-            source + "_" + target,
-            None)
+        return self.edge_weights.get(f"{source}_{target}", None)
 
     def remove_edge(self, source, target):
         source, target = self.__getattribute__(source), \
-                         self.__getattribute__(target)
+                             self.__getattribute__(target)
         source.remove_adjacent_node(target.name)
-        self.edge_weights.pop(source.name + "_" + target.name,
-                                None)
+        self.edge_weights.pop(f"{source.name}_{target.name}", None)

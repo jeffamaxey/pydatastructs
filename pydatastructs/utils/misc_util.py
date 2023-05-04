@@ -31,8 +31,9 @@ class Backend(Enum):
 
 def raise_if_backend_is_not_python(api, backend):
     if backend != Backend.PYTHON:
-        raise ValueError("As of {} version, only {} backend is supported for {} API".format(
-                            pydatastructs.__version__, str(Backend.PYTHON), api))
+        raise ValueError(
+            f"As of {pydatastructs.__version__} version, only {str(Backend.PYTHON)} backend is supported for {api} API"
+        )
 
 _check_type = lambda a, t: isinstance(a, t)
 NoneType = type(None)
@@ -427,7 +428,7 @@ class AdjacencyListGraphNode(GraphNode):
         adjacency list.
         """
         if not hasattr(self, name):
-            raise ValueError("%s is not adjacent to %s"%(name, self.name))
+            raise ValueError(f"{name} is not adjacent to {self.name}")
         self.adjacent.remove(name)
         delattr(self, name)
 
@@ -575,12 +576,15 @@ def _comp(u, v, tcomp):
     two values where any one of them can be
     `None`.
     """
-    if u is None and v is not None:
+    if (
+        u is None
+        and v is not None
+        or (u is None or v is not None)
+        and u is None
+    ):
         return False
-    elif u is not None and v is None:
+    elif v is None:
         return True
-    elif u is None and v is None:
-        return False
     else:
         return tcomp(u, v)
 

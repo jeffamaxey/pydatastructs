@@ -71,8 +71,9 @@ class ArraySegmentTree(object):
         if dimensions == 1:
             return OneDimensionalArraySegmentTree(array, func, **kwargs)
         else:
-            raise NotImplementedError("ArraySegmentTree do not support "
-                                      "{}-dimensional arrays as of now.".format(dimensions))
+            raise NotImplementedError(
+                f"ArraySegmentTree do not support {dimensions}-dimensional arrays as of now."
+            )
 
     def build(self):
         """
@@ -106,11 +107,10 @@ class ArraySegmentTree(object):
             node = recursion_stack.pop().key
             if node is not None:
                 to_be_printed.append(str((node.key, node.data)))
-            else:
-                to_be_printed.append('')
-            if node is not None:
                 recursion_stack.push(node.right)
                 recursion_stack.push(node.left)
+            else:
+                to_be_printed.append('')
         return str(to_be_printed)
 
 
@@ -130,7 +130,7 @@ class OneDimensionalArraySegmentTree(ArraySegmentTree):
         return obj
 
     @classmethod
-    def methods(self):
+    def methods(cls):
         return ['__new__', 'build', 'update',
                 'query']
 
@@ -173,8 +173,9 @@ class OneDimensionalArraySegmentTree(ArraySegmentTree):
 
     def update(self, index, value):
         if not self.is_ready:
-            raise ValueError("{} tree is not built yet. ".format(self) +
-                             "Call .build method to prepare the segment tree.")
+            raise ValueError(
+                f"{self} tree is not built yet. Call .build method to prepare the segment tree."
+            )
 
         recursion_stack = Stack(implementation='linked_list')
         recursion_stack.push((self._root, None))
@@ -199,7 +200,7 @@ class OneDimensionalArraySegmentTree(ArraySegmentTree):
                     recursion_stack.push((parent_node.key[0], node))
             else:
                 mid = (start + end) // 2
-                if start <= index and index <= mid:
+                if start <= index <= mid:
                     recursion_stack.push((node.left, None))
                 else:
                     recursion_stack.push((node.right, None))
@@ -218,8 +219,9 @@ class OneDimensionalArraySegmentTree(ArraySegmentTree):
 
     def query(self, start, end):
         if not self.is_ready:
-            raise ValueError("{} tree is not built yet. ".format(self) +
-                             "Call .build method to prepare the segment tree.")
+            raise ValueError(
+                f"{self} tree is not built yet. Call .build method to prepare the segment tree."
+            )
 
         return self._query(self._root, 0, len(self._array) - 1,
                            start, end)

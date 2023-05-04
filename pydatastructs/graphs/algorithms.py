@@ -82,7 +82,7 @@ def breadth_first_search(
     raise_if_backend_is_not_python(
         breadth_first_search, kwargs.get('backend', Backend.PYTHON))
     import pydatastructs.graphs.algorithms as algorithms
-    func = "_breadth_first_search_" + graph._impl
+    func = f"_breadth_first_search_{graph._impl}"
     if not hasattr(algorithms, func):
         raise NotImplementedError(
         "Currently breadth first search isn't implemented for "
@@ -93,9 +93,8 @@ def breadth_first_search(
 def _breadth_first_search_adjacency_list(
     graph, source_node, operation, *args, **kwargs):
     bfs_queue = Queue()
-    visited = {}
     bfs_queue.append(source_node)
-    visited[source_node] = True
+    visited = {source_node: True}
     while len(bfs_queue) != 0:
         curr_node = bfs_queue.popleft()
         next_nodes = graph.neighbors(curr_node)
@@ -170,7 +169,7 @@ def breadth_first_search_parallel(
     raise_if_backend_is_not_python(
         breadth_first_search_parallel, kwargs.get('backend', Backend.PYTHON))
     import pydatastructs.graphs.algorithms as algorithms
-    func = "_breadth_first_search_parallel_" + graph._impl
+    func = f"_breadth_first_search_parallel_{graph._impl}"
     if not hasattr(algorithms, func):
         raise NotImplementedError(
         "Currently breadth first search isn't implemented for "
@@ -180,7 +179,7 @@ def breadth_first_search_parallel(
 
 def _generate_layer(**kwargs):
     _args, _kwargs = kwargs.get('args'), kwargs.get('kwargs')
-    (graph, curr_node, next_layer, visited, operation) = _args[0:5]
+    (graph, curr_node, next_layer, visited, operation) = _args[:5]
     op_args, op_kwargs = _args[5:], _kwargs
     next_nodes = graph.neighbors(curr_node)
     status = True
@@ -197,8 +196,7 @@ def _generate_layer(**kwargs):
 def _breadth_first_search_parallel_adjacency_list(
     graph, source_node, num_threads, operation, *args, **kwargs):
     visited, layers = {}, {}
-    layers[0] = set()
-    layers[0].add(source_node)
+    layers[0] = {source_node}
     visited[source_node] = True
     layer = 0
     while len(layers[layer]) != 0:
@@ -216,8 +214,7 @@ def _breadth_first_search_parallel_adjacency_list(
 _breadth_first_search_parallel_adjacency_matrix = _breadth_first_search_parallel_adjacency_list
 
 def _generate_mst_object(graph):
-    mst = Graph(*[getattr(graph, str(v)) for v in graph.vertices])
-    return mst
+    return Graph(*[getattr(graph, str(v)) for v in graph.vertices])
 
 def _sort_edges(graph, num_threads=None):
     edges = list(graph.edge_weights.items())
@@ -261,7 +258,7 @@ def _minimum_spanning_tree_prim_adjacency_list(graph):
                 mst.add_edge(edge.target.name, edge.source.name, edge.value)
             for w_node in graph.neighbors(v):
                 w = w_node.name
-                vw = graph.edge_weights[v + '_' + w]
+                vw = graph.edge_weights[f'{v}_{w}']
                 q.push(w, vw.value)
                 if e.get(w, None) is None or \
                     e[w].value > vw.value:
@@ -331,7 +328,7 @@ def minimum_spanning_tree(graph, algorithm, **kwargs):
     raise_if_backend_is_not_python(
         minimum_spanning_tree, kwargs.get('backend', Backend.PYTHON))
     import pydatastructs.graphs.algorithms as algorithms
-    func = "_minimum_spanning_tree_" + algorithm + "_" + graph._impl
+    func = f"_minimum_spanning_tree_{algorithm}_{graph._impl}"
     if not hasattr(algorithms, func):
         raise NotImplementedError(
         "Currently %s algoithm for %s implementation of graphs "
@@ -357,20 +354,15 @@ _minimum_spanning_tree_parallel_kruskal_adjacency_matrix = \
     _minimum_spanning_tree_parallel_kruskal_adjacency_list
 
 def _find_min(q, v, i):
-    if not q.is_empty:
-        v[i] = q.peek
-    else:
-        v[i] = None
+    v[i] = None if q.is_empty else q.peek
 
 def _minimum_spanning_tree_parallel_prim_adjacency_list(graph, num_threads):
     q = [PriorityQueue(implementation='binomial_heap') for _ in range(num_threads)]
     e = [{} for _ in range(num_threads)]
-    v2q = {}
     mst = Graph(implementation='adjacency_list')
 
     itr = iter(graph.vertices)
-    for i in range(len(graph.vertices)):
-        v2q[next(itr)] = i%len(q)
+    v2q = {next(itr): i%len(q) for i in range(len(graph.vertices))}
     q[0].push(next(iter(graph.vertices)), 0)
 
     while True:
@@ -399,7 +391,7 @@ def _minimum_spanning_tree_parallel_prim_adjacency_list(graph, num_threads):
                 mst.add_edge(edge.target.name, edge.source.name, edge.value)
             for w_node in graph.neighbors(v):
                 w = w_node.name
-                vw = graph.edge_weights[v + '_' + w]
+                vw = graph.edge_weights[f'{v}_{w}']
                 j = v2q[w]
                 q[j].push(w, vw.value)
                 if e[j].get(w, None) is None or \
@@ -473,7 +465,7 @@ def minimum_spanning_tree_parallel(graph, algorithm, num_threads, **kwargs):
     raise_if_backend_is_not_python(
         minimum_spanning_tree_parallel, kwargs.get('backend', Backend.PYTHON))
     import pydatastructs.graphs.algorithms as algorithms
-    func = "_minimum_spanning_tree_parallel_" + algorithm + "_" + graph._impl
+    func = f"_minimum_spanning_tree_parallel_{algorithm}_{graph._impl}"
     if not hasattr(algorithms, func):
         raise NotImplementedError(
         "Currently %s algoithm for %s implementation of graphs "
@@ -581,7 +573,7 @@ def strongly_connected_components(graph, algorithm, **kwargs):
     raise_if_backend_is_not_python(
         strongly_connected_components, kwargs.get('backend', Backend.PYTHON))
     import pydatastructs.graphs.algorithms as algorithms
-    func = "_strongly_connected_components_" + algorithm + "_" + graph._impl
+    func = f"_strongly_connected_components_{algorithm}_{graph._impl}"
     if not hasattr(algorithms, func):
         raise NotImplementedError(
         "Currently %s algoithm for %s implementation of graphs "
@@ -649,7 +641,7 @@ def depth_first_search(
     raise_if_backend_is_not_python(
         depth_first_search, kwargs.get('backend', Backend.PYTHON))
     import pydatastructs.graphs.algorithms as algorithms
-    func = "_depth_first_search_" + graph._impl
+    func = f"_depth_first_search_{graph._impl}"
     if not hasattr(algorithms, func):
         raise NotImplementedError(
         "Currently depth first search isn't implemented for "
@@ -660,9 +652,8 @@ def depth_first_search(
 def _depth_first_search_adjacency_list(
     graph, source_node, operation, *args, **kwargs):
     dfs_stack = Stack()
-    visited = {}
     dfs_stack.append(source_node)
-    visited[source_node] = True
+    visited = {source_node: True}
     while len(dfs_stack) != 0:
         curr_node = dfs_stack.pop()
         next_nodes = graph.neighbors(curr_node)
@@ -745,7 +736,7 @@ def shortest_paths(graph: Graph, algorithm: str,
     raise_if_backend_is_not_python(
         shortest_paths, kwargs.get('backend', Backend.PYTHON))
     import pydatastructs.graphs.algorithms as algorithms
-    func = "_" + algorithm + "_" + graph._impl
+    func = f"_{algorithm}_{graph._impl}"
     if not hasattr(algorithms, func):
         raise NotImplementedError(
         "Currently %s algorithm isn't implemented for "
@@ -775,9 +766,7 @@ def _bellman_ford_adjacency_list(graph: Graph, source: str, target: str) -> tupl
         if distances[u] + w < distances[v]:
             raise ValueError("Graph contains a negative weight cycle.")
 
-    if target != "":
-        return (distances[target], predecessor)
-    return (distances, predecessor)
+    return (distances[target], predecessor) if target else (distances, predecessor)
 
 _bellman_ford_adjacency_matrix = _bellman_ford_adjacency_list
 
@@ -791,22 +780,20 @@ def _dijkstra_adjacency_list(graph: Graph, start: str, target: str):
             dist[v] = float('inf')
     dist[start] = 0
     pq = PriorityQueue(implementation='binomial_heap')
-    for vertex in dist:
-        pq.push(vertex, dist[vertex])
+    for vertex, value in dist.items():
+        pq.push(vertex, value)
     for _ in range(V):
         u = pq.pop()
         visited[u] = True
         for v in graph.vertices:
-            edge_str = u + '_' + v
+            edge_str = f'{u}_{v}'
             if (edge_str in graph.edge_weights and graph.edge_weights[edge_str].value > 0 and
                 visited[v] is False and dist[v] > dist[u] + graph.edge_weights[edge_str].value):
                 dist[v] = dist[u] + graph.edge_weights[edge_str].value
                 pred[v] = u
                 pq.push(v, dist[v])
 
-    if target != "":
-        return (dist[target], pred)
-    return dist, pred
+    return (dist[target], pred) if target != "" else (dist, pred)
 
 _dijkstra_adjacency_matrix = _dijkstra_adjacency_list
 
@@ -861,7 +848,7 @@ def all_pair_shortest_paths(graph: Graph, algorithm: str,
     raise_if_backend_is_not_python(
         all_pair_shortest_paths, kwargs.get('backend', Backend.PYTHON))
     import pydatastructs.graphs.algorithms as algorithms
-    func = "_" + algorithm + "_" + graph._impl
+    func = f"_{algorithm}_{graph._impl}"
     if not hasattr(algorithms, func):
         raise NotImplementedError(
         "Currently %s algorithm isn't implemented for "
@@ -890,7 +877,7 @@ def _floyd_warshall_adjacency_list(graph: Graph):
                 dist_i_j = dist.get(i, {}).get(j, float('inf'))
                 dist_i_k = dist.get(i, {}).get(k, float('inf'))
                 dist_k_j = dist.get(k, {}).get(j, float('inf'))
-                next_i_k = next_vertex.get(i + '_' + k, None)
+                next_i_k = next_vertex.get(f'{i}_{k}', None)
                 if dist_i_j > dist_i_k + dist_k_j:
                     dist[i][j] = dist_i_k + dist_k_j
                     next_vertex[i][j] = next_i_k
@@ -944,7 +931,7 @@ def topological_sort(graph: Graph, algorithm: str,
     raise_if_backend_is_not_python(
         topological_sort, kwargs.get('backend', Backend.PYTHON))
     import pydatastructs.graphs.algorithms as algorithms
-    func = "_" + algorithm + "_" + graph._impl
+    func = f"_{algorithm}_{graph._impl}"
     if not hasattr(algorithms, func):
         raise NotImplementedError(
         "Currently %s algorithm isn't implemented for "
@@ -1025,7 +1012,7 @@ def topological_sort_parallel(graph: Graph, algorithm: str, num_threads: int,
     raise_if_backend_is_not_python(
         topological_sort_parallel, kwargs.get('backend', Backend.PYTHON))
     import pydatastructs.graphs.algorithms as algorithms
-    func = "_" + algorithm + "_" + graph._impl + '_parallel'
+    func = f"_{algorithm}_{graph._impl}_parallel"
     if not hasattr(algorithms, func):
         raise NotImplementedError(
         "Currently %s algorithm isn't implemented for "

@@ -120,8 +120,8 @@ def test_DynamicOneDimensionalArray():
         data = [random.random() * 2 * size for _ in range(size)]
         doda_cpp = DynamicOneDimensionalArray(float, data, backend=Backend.CPP)
         doda_python = DynamicOneDimensionalArray(float, data)
-        python_list = [datum for datum in data]
-        list_indices = [i for i in range(size)]
+        python_list = list(data)
+        list_indices = list(range(size))
         random.seed(0)
         random.shuffle(list_indices)
 
@@ -141,7 +141,7 @@ def test_DynamicOneDimensionalArray():
 
         cpp_backend, python_backend = (0, 0)
         while doda_cpp._num > 0:
-            indices = [i for i in range(doda_cpp._last_pos_filled + 1)]
+            indices = list(range(doda_cpp._last_pos_filled + 1))
             random.shuffle(indices)
             for idx in indices:
                 timer_cpp = timeit.Timer(functools.partial(doda_cpp.delete, idx))

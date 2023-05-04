@@ -30,7 +30,7 @@ class AdjacencyMatrix(Graph):
         return obj
 
     @classmethod
-    def methods(self):
+    def methods(cls):
         return ['is_adjacent', 'neighbors',
         'add_edge', 'get_edge', 'remove_edge',
         '__new__']
@@ -42,13 +42,12 @@ class AdjacencyMatrix(Graph):
 
     def neighbors(self, node):
         node = str(node)
-        neighbors = []
         row = self.matrix.get(node, {})
-        for node, presence in row.items():
-            if presence:
-                neighbors.append(self.__getattribute__(
-                                 str(node)))
-        return neighbors
+        return [
+            self.__getattribute__(node)
+            for node, presence in row.items()
+            if presence
+        ]
 
     def add_vertex(self, node):
         raise NotImplementedError("Currently we allow "
@@ -74,17 +73,14 @@ class AdjacencyMatrix(Graph):
 
         self.matrix[source][target] = True
         if cost is not None:
-            self.edge_weights[source + "_" + target] = \
-                GraphEdge(self.__getattribute__(source),
-                          self.__getattribute__(target),
-                          cost)
+            self.edge_weights[f"{source}_{target}"] = GraphEdge(
+                self.__getattribute__(source), self.__getattribute__(target), cost
+            )
 
     def get_edge(self, source, target):
-        return self.edge_weights.get(
-            str(source) + "_" + str(target),
-            None)
+        return self.edge_weights.get(f"{str(source)}_{str(target)}", None)
 
     def remove_edge(self, source, target):
         source, target = str(source), str(target)
         self.matrix[source][target] = False
-        self.edge_weights.pop(str(source) + "_" + str(target), None)
+        self.edge_weights.pop(f"{source}_{target}", None)

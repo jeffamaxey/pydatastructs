@@ -42,7 +42,7 @@ class DisjointSetForest(object):
         raise_if_backend_is_not_python(
             cls, kwargs.get('backend', Backend.PYTHON))
         obj = object.__new__(cls)
-        obj.tree = dict()
+        obj.tree = {}
         return obj
 
     @classmethod
@@ -68,7 +68,7 @@ class DisjointSetForest(object):
         splitting algorithm.
         """
         if self.tree.get(key, None) is None:
-            raise KeyError("Invalid key, %s"%(key))
+            raise KeyError(f"Invalid key, {key}")
         _set = self.tree[key]
         while _set.parent is not _set:
             _set, _set.parent = _set.parent, _set.parent.parent
@@ -96,7 +96,7 @@ class DisjointSetForest(object):
         and makes it as the root of the set.
         """
         if self.tree.get(key, None) is None:
-            raise KeyError("Invalid key, %s"%(key))
+            raise KeyError(f"Invalid key, {key}")
 
         key_set = self.tree[key]
         if key_set.parent is not key_set:

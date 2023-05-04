@@ -22,9 +22,7 @@ def _test_RangeQueryDynamic_common(func, gen_expected):
     for array_size in array_sizes:
         inputs = []
         for i in range(array_size):
-            for j in range(i + 1, array_size):
-                inputs.append((i, j))
-
+            inputs.extend((i, j) for j in range(i + 1, array_size))
         data_structures = ["array", "segment_tree"]
         for ds in data_structures:
             data = random.sample(range(-2*array_size, 2*array_size), array_size)
@@ -55,11 +53,10 @@ def test_RangeQueryDynamic_greatest_common_divisor():
     def _gen_gcd_expected(data, i, j):
         if j == i:
             return data[i]
-        else:
-            expected_gcd = math.gcd(data[i], data[i + 1])
-            for idx in range(i + 2, j + 1):
-                expected_gcd = math.gcd(expected_gcd, data[idx])
-            return expected_gcd
+        expected_gcd = math.gcd(data[i], data[i + 1])
+        for idx in range(i + 2, j + 1):
+            expected_gcd = math.gcd(expected_gcd, data[idx])
+        return expected_gcd
 
     _test_RangeQueryDynamic_common(greatest_common_divisor, _gen_gcd_expected)
 

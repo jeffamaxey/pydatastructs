@@ -47,11 +47,10 @@ def test_RangeQueryStatic_greatest_common_divisor():
     def _gen_gcd_expected(data, i, j):
         if j == i:
             return data[i]
-        else:
-            expected_gcd = math.gcd(data[i], data[i + 1])
-            for idx in range(i + 2, j + 1):
-                expected_gcd = math.gcd(expected_gcd, data[idx])
-            return expected_gcd
+        expected_gcd = math.gcd(data[i], data[i + 1])
+        for idx in range(i + 2, j + 1):
+            expected_gcd = math.gcd(expected_gcd, data[idx])
+        return expected_gcd
 
     _test_RangeQueryStatic_common(greatest_common_divisor, _gen_gcd_expected)
 

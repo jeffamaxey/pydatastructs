@@ -83,7 +83,7 @@ class RangeQueryStatic:
         raise_if_backend_is_not_python(
             cls, kwargs.get('backend', Backend.PYTHON))
         if len(array) == 0:
-            raise ValueError("Input %s array is empty."%(array))
+            raise ValueError(f"Input {array} array is empty.")
 
         if data_structure == 'array':
             return RangeQueryStaticArray(array, func)
@@ -99,7 +99,7 @@ class RangeQueryStatic:
     def methods(cls):
         return ['query']
 
-    def query(start, end):
+    def query(self, end):
         """
         Method to perform a query in [start, end) range.
 
@@ -243,7 +243,7 @@ class RangeQueryDynamic:
             cls, kwargs.get('backend', Backend.PYTHON))
 
         if len(array) == 0:
-            raise ValueError("Input %s array is empty."%(array))
+            raise ValueError(f"Input {array} array is empty.")
 
         if data_structure == 'array':
             return RangeQueryDynamicArray(array, func, **kwargs)
@@ -259,7 +259,7 @@ class RangeQueryDynamic:
     def methods(cls):
         return ['query', 'update']
 
-    def query(start, end):
+    def query(self, end):
         """
         Method to perform a query in [start, end) range.
 

@@ -761,7 +761,7 @@ class SkipList(object):
         path = self._search(key)
         tip = path[-1]
         if tip.next.key != key:
-            raise KeyError('Node with key %s is not there in %s'%(key, self))
+            raise KeyError(f'Node with key {key} is not there in {self}')
         return_node = SkipNode(tip.next.key, tip.next.data)
         total_level = self._levels
         level = total_level - 1
@@ -770,13 +770,12 @@ class SkipList(object):
             level -= 1
         walk = self.head
         while walk is not None:
-            if walk.next is self.tail:
-                self._levels -= 1
-                self.head = walk.down
-                self.tail = self.tail.down
-                walk = walk.down
-            else:
+            if walk.next is not self.tail:
                 break
+            self._levels -= 1
+            self.head = walk.down
+            self.tail = self.tail.down
+            walk = walk.down
         self._num_nodes -= 1
         if self._levels == 0:
             self._add_level()
@@ -791,7 +790,7 @@ class SkipList(object):
             curr_node = walk
             col = 0
             while curr_node is not None:
-                if curr_node.key != math.inf and curr_node.key != -math.inf:
+                if curr_node.key not in [math.inf, -math.inf]:
                     node2row[curr_node] = curr_level
                     if walk.down is None:
                         node2col[curr_node.key] = col
@@ -813,7 +812,7 @@ class SkipList(object):
         sl_str = ""
         for level_list in sl_mat[::-1]:
             for node_str in level_list:
-                sl_str += node_str + " "
+                sl_str += f"{node_str} "
             if len(sl_str) > 0:
                 sl_str += "\n"
         return sl_str

@@ -60,7 +60,7 @@ class SparseTable(object):
 
         # TODO: If possible remove the following check.
         if len(array) == 0:
-            raise ValueError("Input %s array is empty."%(array))
+            raise ValueError(f"Input {array} array is empty.")
 
         obj = object.__new__(cls)
         size = len(array)

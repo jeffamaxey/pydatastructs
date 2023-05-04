@@ -31,9 +31,7 @@ def test_BinaryHeap():
     expected_sorted_elements = [36, 25, 19, 17, 7, 3, 2, 1]
     l = max_heap.heap[0].left
     l = max_heap.heap[0].right
-    sorted_elements = []
-    for _ in range(8):
-        sorted_elements.append(max_heap.extract().key)
+    sorted_elements = [max_heap.extract().key for _ in range(8)]
     assert expected_sorted_elements == sorted_elements
 
     elements = [
@@ -87,9 +85,7 @@ def test_TernaryHeap():
     assert max_heap.extract().key == 100
 
     expected_sorted_elements = [36, 25, 19, 17, 7, 3, 2, 1]
-    sorted_elements = []
-    for _ in range(8):
-        sorted_elements.append(max_heap.extract().key)
+    sorted_elements = [max_heap.extract().key for _ in range(8)]
     assert expected_sorted_elements == sorted_elements
 
     elements = [
@@ -127,9 +123,7 @@ def test_DHeap():
     assert max_heap.extract().key == 100
 
     expected_sorted_elements = [36, 25, 19, 17, 7, 3, 2, 1]
-    sorted_elements = []
-    for _ in range(8):
-        sorted_elements.append(max_heap.extract().key)
+    sorted_elements = [max_heap.extract().key for _ in range(8)]
     assert expected_sorted_elements == sorted_elements
 
     elements = [

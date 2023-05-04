@@ -619,8 +619,8 @@ def test_RedBlackTree():
     tree.delete(160)
     in_order = trav.depth_first_search(order='in_order')
     pre_order = trav.depth_first_search(order='pre_order')
-    assert [node.key for node in in_order if node.key is not None] == []
-    assert [node.key for node in pre_order if node.key is not None] == []
+    assert not [node.key for node in in_order if node.key is not None]
+    assert not [node.key for node in pre_order if node.key is not None]
 
     tree = RedBlackTree()
     tree.insert(50)

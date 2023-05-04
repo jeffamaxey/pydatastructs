@@ -71,10 +71,8 @@ def _test_common_sort(sort, *args, **kwargs):
     assert arr._data == expected_arr_3
 
     arr = OneDimensionalArray(int, n, backend=Backend.CPP)
-    int_idx = 0
-    for i in range(n):
+    for int_idx, i in enumerate(range(n)):
         arr[i] = generated_ints[int_idx]
-        int_idx += 1
     sort(arr, *args, **kwargs, start=2, end=5)
     for i in range(len(expected_arr_3)):
         assert arr[i] == expected_arr_3[i]
@@ -352,7 +350,7 @@ def test_next_prev_permutation():
     ODA = OneDimensionalArray
     random.seed(1000)
 
-    for i in range(100):
+    for _ in range(100):
         data = set(random.sample(range(1, 10000), 10))
         array = ODA(int, list(data))
 

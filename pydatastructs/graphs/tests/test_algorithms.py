@@ -9,7 +9,7 @@ def test_breadth_first_search():
 
     def _test_breadth_first_search(ds):
         import pydatastructs.utils.misc_util as utils
-        GraphNode = getattr(utils, "Adjacency" + ds + "GraphNode")
+        GraphNode = getattr(utils, f"Adjacency{ds}GraphNode")
 
         V1 = GraphNode(0)
         V2 = GraphNode(1)
@@ -81,7 +81,7 @@ def test_breadth_first_search_parallel():
 
     def _test_breadth_first_search_parallel(ds):
         import pydatastructs.utils.misc_util as utils
-        GraphNode = getattr(utils, "Adjacency" + ds + "GraphNode")
+        GraphNode = getattr(utils, f"Adjacency{ds}GraphNode")
 
         V1 = GraphNode(0)
         V2 = GraphNode(1)
@@ -129,7 +129,7 @@ def test_minimum_spanning_tree():
 
     def _test_minimum_spanning_tree(func, ds, algorithm, *args):
         import pydatastructs.utils.misc_util as utils
-        GraphNode = getattr(utils, "Adjacency" + ds + "GraphNode")
+        GraphNode = getattr(utils, f"Adjacency{ds}GraphNode")
         a, b, c, d, e = [GraphNode(x) for x in [0, 1, 2, 3, 4]]
         graph = Graph(a, b, c, d, e)
         graph.add_edge(a.name, c.name, 10)
@@ -162,7 +162,7 @@ def test_strongly_connected_components():
 
     def _test_strongly_connected_components(func, ds, algorithm, *args):
         import pydatastructs.utils.misc_util as utils
-        GraphNode = getattr(utils, "Adjacency" + ds + "GraphNode")
+        GraphNode = getattr(utils, f"Adjacency{ds}GraphNode")
         a, b, c, d, e, f, g, h = \
         [GraphNode(chr(x)) for x in range(ord('a'), ord('h') + 1)]
         graph = Graph(a, b, c, d, e, f, g, h)
@@ -192,7 +192,7 @@ def test_depth_first_search():
 
     def _test_depth_first_search(ds):
         import pydatastructs.utils.misc_util as utils
-        GraphNode = getattr(utils, "Adjacency" + ds + "GraphNode")
+        GraphNode = getattr(utils, f"Adjacency{ds}GraphNode")
 
         V1 = GraphNode(0)
         V2 = GraphNode(1)
@@ -264,7 +264,7 @@ def test_shortest_paths():
 
     def _test_shortest_paths_positive_edges(ds, algorithm):
         import pydatastructs.utils.misc_util as utils
-        GraphNode = getattr(utils, "Adjacency" + ds + "GraphNode")
+        GraphNode = getattr(utils, f"Adjacency{ds}GraphNode")
         vertices = [GraphNode('S'), GraphNode('C'),
                     GraphNode('SLC'), GraphNode('SF'),
                     GraphNode('D')]
@@ -290,7 +290,7 @@ def test_shortest_paths():
 
     def _test_shortest_paths_negative_edges(ds, algorithm):
         import pydatastructs.utils.misc_util as utils
-        GraphNode = getattr(utils, "Adjacency" + ds + "GraphNode")
+        GraphNode = getattr(utils, f"Adjacency{ds}GraphNode")
         vertices = [GraphNode('s'), GraphNode('a'),
                     GraphNode('b'), GraphNode('c'),
                     GraphNode('d')]
@@ -320,7 +320,7 @@ def test_all_pair_shortest_paths():
 
     def _test_shortest_paths_negative_edges(ds, algorithm):
         import pydatastructs.utils.misc_util as utils
-        GraphNode = getattr(utils, "Adjacency" + ds + "GraphNode")
+        GraphNode = getattr(utils, f"Adjacency{ds}GraphNode")
         vertices = [GraphNode('1'), GraphNode('2'),
                     GraphNode('3'), GraphNode('4')]
 
@@ -344,7 +344,7 @@ def test_topological_sort():
 
     def _test_topological_sort(func, ds, algorithm, threads=None):
         import pydatastructs.utils.misc_util as utils
-        GraphNode = getattr(utils, "Adjacency" + ds + "GraphNode")
+        GraphNode = getattr(utils, f"Adjacency{ds}GraphNode")
         vertices = [GraphNode('2'), GraphNode('3'), GraphNode('5'),
                     GraphNode('7'), GraphNode('8'), GraphNode('10'),
                     GraphNode('11'), GraphNode('9')]
@@ -363,9 +363,15 @@ def test_topological_sort():
             l = func(graph, algorithm, threads)
         else:
             l = func(graph, algorithm)
-        assert all([(l1 in l[0:3]) for l1 in ('3', '5', '7')] +
-                   [(l2 in l[3:5]) for l2 in ('8', '11')] +
-                   [(l3 in l[5:]) for l3 in ('10', '9', '2')])
+        assert all(
+            (
+                (
+                    [l1 in l[:3] for l1 in ('3', '5', '7')]
+                    + [(l2 in l[3:5]) for l2 in ('8', '11')]
+                )
+                + [(l3 in l[5:]) for l3 in ('10', '9', '2')]
+            )
+        )
 
     _test_topological_sort(topological_sort, "List", "kahn")
     _test_topological_sort(topological_sort_parallel, "List", "kahn", 3)

@@ -161,7 +161,7 @@ class MAryTree(object):
 
 
     def __str__(self):
-        to_be_printed = ['' for i in range(self.tree._last_pos_filled + 1)]
+        to_be_printed = ['' for _ in range(self.tree._last_pos_filled + 1)]
         for i in range(self.tree._last_pos_filled + 1):
             if self.tree[i] is not None:
                 node = self.tree[i]

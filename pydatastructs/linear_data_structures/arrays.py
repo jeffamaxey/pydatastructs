@@ -89,13 +89,13 @@ class OneDimensionalArray(Array):
         obj._dtype = dtype
         if len(args) == 2:
             if _check_type(args[0], list) and \
-                _check_type(args[1], int):
+                    _check_type(args[1], int):
                 for i in range(len(args[0])):
                     if _check_type(args[0][i], dtype) is False:
                         args[0][i] = dtype(args[0][i])
                 size, data = args[1], list(args[0])
             elif _check_type(args[1], list) and \
-                _check_type(args[0], int):
+                    _check_type(args[0], int):
                 for i in range(len(args[1])):
                     if _check_type(args[1][i], dtype) is False:
                         args[1][i] = dtype(args[1][i])
@@ -104,21 +104,22 @@ class OneDimensionalArray(Array):
                 raise TypeError("Expected type of size is int and "
                                 "expected type of data is list/tuple.")
             if size != len(data):
-                raise ValueError("Conflict in the size, %s and length of data, %s"
-                                 %(size, len(data)))
+                raise ValueError(
+                    f"Conflict in the size, {size} and length of data, {len(data)}"
+                )
             obj._size, obj._data = size, data
 
         elif len(args) == 1:
             if _check_type(args[0], int):
                 obj._size = args[0]
                 init = kwargs.get('init', None)
-                obj._data = [init for i in range(args[0])]
+                obj._data = [init for _ in range(args[0])]
             elif _check_type(args[0], (list, tuple)):
                 for i in range(len(args[0])):
                     if _check_type(args[0][i], dtype) is False:
                         args[0][i] = dtype(args[0][i])
                 obj._size, obj._data = len(args[0]), \
-                                        list(args[0])
+                                            list(args[0])
             else:
                 raise TypeError("Expected type of size is int and "
                                 "expected type of data is list/tuple.")
@@ -132,8 +133,7 @@ class OneDimensionalArray(Array):
 
     def __getitem__(self, i):
         if i >= self._size or i < 0:
-            raise IndexError(("Index, {} out of range, "
-                              "[{}, {}).".format(i, 0, self._size)))
+            raise IndexError(f"Index, {i} out of range, [0, {self._size}).")
         return self._data.__getitem__(i)
 
     def __setitem__(self, idx, elem):
@@ -228,8 +228,7 @@ class MultiDimensionalArray(Array):
             d_sizes.append(size)
             n_dimensions -= 1
             index += 1
-        d_sizes.append(dimensions[index])
-        d_sizes.append(1)
+        d_sizes.extend((dimensions[index], 1))
         obj = Array.__new__(cls)
         obj._dtype = dtype
         obj._sizes = tuple(d_sizes)
@@ -244,9 +243,7 @@ class MultiDimensionalArray(Array):
         self._compare_shape(indices)
         if isinstance(indices, int):
             return self._data[indices]
-        position = 0
-        for i in range(0, len(indices)):
-            position += self._sizes[i + 1] * indices[i]
+        position = sum(self._sizes[i + 1] * indices[i] for i in range(0, len(indices)))
         return self._data[position]
 
     def __setitem__(self, indices, element) -> None:
@@ -254,15 +251,13 @@ class MultiDimensionalArray(Array):
         if isinstance(indices, int):
             self._data[indices] = element
         else:
-            position = 0
-            for i in range(0, len(indices)):
-                position += self._sizes[i + 1] * indices[i]
+            position = sum(self._sizes[i + 1] * indices[i] for i in range(0, len(indices)))
             self._data[position] = element
 
     def _compare_shape(self, indices) -> None:
         indices = [indices] if isinstance(indices, int) else indices
         if len(indices) != len(self._sizes) - 1:
-            raise IndexError("Shape mismatch, current shape is %s" % str(self.shape))
+            raise IndexError(f"Shape mismatch, current shape is {str(self.shape)}")
         if any(indices[i] >= self._sizes[i] for i in range(len(indices))):
             raise IndexError("Index out of range.")
 
@@ -273,10 +268,8 @@ class MultiDimensionalArray(Array):
 
     @property
     def shape(self) -> tuple:
-        shape = []
         size = len(self._sizes)
-        for i in range(1, size):
-            shape.append(self._sizes[i-1]//self._sizes[i])
+        shape = [self._sizes[i-1]//self._sizes[i] for i in range(1, size)]
         return tuple(shape)
 
 class DynamicArray(Array):
@@ -451,24 +444,24 @@ class ArrayForTrees(DynamicOneDimensionalArray):
     pydatastructs.linear_data_structures.arrays.DynamicOneDimensionalArray
     """
     def _modify(self):
-        if self._num/self._size < self._load_factor:
-            new_indices = {}
-            arr_new = OneDimensionalArray(self._dtype, 2*self._num + 1)
-            j = 0
-            for i in range(self._last_pos_filled + 1):
-                if self[i] is not None:
-                    arr_new[j] = self[i]
-                    new_indices[self[i].key] = j
-                    j += 1
-            for i in range(j):
-                if arr_new[i].left is not None:
-                    arr_new[i].left = new_indices[self[arr_new[i].left].key]
-                if arr_new[i].right is not None:
-                    arr_new[i].right = new_indices[self[arr_new[i].right].key]
-                if arr_new[i].parent is not None:
-                    arr_new[i].parent = new_indices[self[arr_new[i].parent].key]
-            self._last_pos_filled = j - 1
-            self._data = arr_new._data
-            self._size = arr_new._size
-            return new_indices
-        return None
+        if self._num / self._size >= self._load_factor:
+            return None
+        new_indices = {}
+        arr_new = OneDimensionalArray(self._dtype, 2*self._num + 1)
+        j = 0
+        for i in range(self._last_pos_filled + 1):
+            if self[i] is not None:
+                arr_new[j] = self[i]
+                new_indices[self[i].key] = j
+                j += 1
+        for i in range(j):
+            if arr_new[i].left is not None:
+                arr_new[i].left = new_indices[self[arr_new[i].left].key]
+            if arr_new[i].right is not None:
+                arr_new[i].right = new_indices[self[arr_new[i].right].key]
+            if arr_new[i].parent is not None:
+                arr_new[i].parent = new_indices[self[arr_new[i].parent].key]
+        self._last_pos_filled = j - 1
+        self._data = arr_new._data
+        self._size = arr_new._size
+        return new_indices

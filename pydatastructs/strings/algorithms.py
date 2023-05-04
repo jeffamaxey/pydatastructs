@@ -68,7 +68,7 @@ def find(text, query, algorithm, **kwargs):
     raise_if_backend_is_not_python(
             find, kwargs.get('backend', Backend.PYTHON))
     import pydatastructs.strings.algorithms as algorithms
-    func = "_" + algorithm
+    func = f"_{algorithm}"
     if not hasattr(algorithms, func):
         raise NotImplementedError(
         "Currently %s algoithm for searching strings "
@@ -111,7 +111,7 @@ def _do_match(string, query, kmp_table):
 
     while j < len(string):
         if query[k] == string[j]:
-            j = j + 1
+            j += 1
             k = k + 1
             if k == len(query):
                 positions.append(j - k)
@@ -119,7 +119,7 @@ def _do_match(string, query, kmp_table):
         else:
             k = kmp_table[k]
             if k < 0:
-                j = j + 1
+                j += 1
                 k = k + 1
 
     return positions

@@ -63,8 +63,7 @@ class Stack(object):
             return LinkedListStack(
                 kwargs.get('items',None)
             )
-        raise NotImplementedError(
-                "%s hasn't been implemented yet."%(implementation))
+        raise NotImplementedError(f"{implementation} hasn't been implemented yet.")
 
     @classmethod
     def methods(cls):

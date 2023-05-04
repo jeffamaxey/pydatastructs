@@ -165,7 +165,7 @@ class BinaryTree(object):
 
 
     def __str__(self):
-        to_be_printed = ['' for i in range(self.tree._last_pos_filled + 1)]
+        to_be_printed = ['' for _ in range(self.tree._last_pos_filled + 1)]
         for i in range(self.tree._last_pos_filled + 1):
             if self.tree[i] is not None:
                 node = self.tree[i]
@@ -281,7 +281,7 @@ class BinarySearchTree(BinaryTree):
         if walk is None:
             return None
         if self.tree[walk].left is None and \
-            self.tree[walk].right is None:
+                self.tree[walk].right is None:
             if parent is None:
                 self.tree[self.root_idx].data = None
                 self.tree[self.root_idx].key = None
@@ -300,7 +300,7 @@ class BinarySearchTree(BinaryTree):
             self._update_size(a)
 
         elif self.tree[walk].left is not None and \
-            self.tree[walk].right is not None:
+                self.tree[walk].right is not None:
             twalk = self.tree[walk].right
             par = walk
             flag = False
@@ -358,9 +358,7 @@ class BinarySearchTree(BinaryTree):
                     self.root_idx = new_indices[root_key]
                 self._update_size(a)
 
-        if kwargs.get("balancing_info", False) is not False:
-            return a
-        return True
+        return a if kwargs.get("balancing_info", False) is not False else True
 
     def select(self, i):
         """
@@ -485,8 +483,7 @@ class BinarySearchTree(BinaryTree):
         path1 = self._simple_path(j, root)
         path2 = self._simple_path(k, root)
         if not path1 or not path2:
-            raise ValueError("One of two path doesn't exists. See %s, %s"
-                             %(path1, path2))
+            raise ValueError(f"One of two path doesn't exists. See {path1}, {path2}")
 
         n, m = len(path1), len(path2)
         i = j = 0
@@ -495,9 +492,7 @@ class BinarySearchTree(BinaryTree):
                 return self.tree[path1[i - 1]].key
             i += 1
             j += 1
-        if path1 < path2:
-            return self.tree[path1[-1]].key
-        return self.tree[path2[-1]].key
+        return self.tree[path1[-1]].key if path1 < path2 else self.tree[path2[-1]].key
 
     def _lca_2(self, j, k):
         curr_root = self.root_idx
@@ -506,9 +501,9 @@ class BinarySearchTree(BinaryTree):
             raise ValueError("One of the nodes with key %s "
                              "or %s doesn't exits"%(j, k))
         u_left = self.comparator(self.tree[u].key, \
-            self.tree[curr_root].key)
+                self.tree[curr_root].key)
         v_left = self.comparator(self.tree[v].key, \
-            self.tree[curr_root].key)
+                self.tree[curr_root].key)
 
         while not (u_left ^ v_left):
             if u_left and v_left:
@@ -516,19 +511,14 @@ class BinarySearchTree(BinaryTree):
             else:
                 curr_root = self.tree[curr_root].right
 
-            if curr_root == u or curr_root == v:
-                if curr_root is None:
-                    return None
-                return self.tree[curr_root].key
-
+            if curr_root in [u, v]:
+                return None if curr_root is None else self.tree[curr_root].key
             u_left = self.comparator(self.tree[u].key, \
-                self.tree[curr_root].key)
+                    self.tree[curr_root].key)
             v_left = self.comparator(self.tree[v].key, \
-                self.tree[curr_root].key)
+                    self.tree[curr_root].key)
 
-        if curr_root is None:
-            return curr_root
-        return self.tree[curr_root].key
+        return curr_root if curr_root is None else self.tree[curr_root].key
 
     def lowest_common_ancestor(self, j, k, algorithm=1):
 
@@ -575,7 +565,7 @@ class BinarySearchTree(BinaryTree):
         .. [2] https://pdfs.semanticscholar.org/e75b/386cc554214aa0ebd6bd6dbdd0e490da3739.pdf
 
         """
-        return getattr(self, "_lca_"+str(algorithm))(j, k)
+        return getattr(self, f"_lca_{str(algorithm)}")(j, k)
 
 class SelfBalancingBinaryTree(BinarySearchTree):
     """
@@ -607,16 +597,16 @@ class SelfBalancingBinaryTree(BinarySearchTree):
         if w is not None:
             self.tree[w].parent = j
         self.tree[i].left, self.tree[i].right, self.tree[i].parent = \
-            k, j, self.tree[j].parent
+                k, j, self.tree[j].parent
         self.tree[k].parent, self.tree[j].parent = i, i
         ip = self.tree[i].parent
-        if ip is not None:
-            if self.tree[ip].left == j:
-                self.tree[ip].left = i
-            else:
-                self.tree[ip].right = i
-        else:
+        if ip is None:
             self.root_idx = i
+
+        elif self.tree[ip].left == j:
+            self.tree[ip].left = i
+        else:
+            self.tree[ip].right = i
 
     def _right_left_rotate(self, j, k):
         i = self.tree[k].left
@@ -627,16 +617,16 @@ class SelfBalancingBinaryTree(BinarySearchTree):
         if w is not None:
             self.tree[w].parent = k
         self.tree[i].right, self.tree[i].left, self.tree[i].parent = \
-            k, j, self.tree[j].parent
+                k, j, self.tree[j].parent
         self.tree[k].parent, self.tree[j].parent = i, i
         ip = self.tree[i].parent
-        if ip is not None:
-            if self.tree[ip].left == j:
-                self.tree[ip].left = i
-            else:
-                self.tree[ip].right = i
-        else:
+        if ip is None:
             self.root_idx = i
+
+        elif self.tree[ip].left == j:
+            self.tree[ip].left = i
+        else:
+            self.tree[ip].right = i
 
     def _left_rotate(self, j, k):
         y = self.tree[k].left
@@ -747,7 +737,7 @@ class CartesianTree(SelfBalancingBinaryTree):
             return super(CartesianTree, self).delete(key, balancing_info = balancing_info)
 
     def __str__(self):
-        to_be_printed = ['' for i in range(self.tree._last_pos_filled + 1)]
+        to_be_printed = ['' for _ in range(self.tree._last_pos_filled + 1)]
         for i in range(self.tree._last_pos_filled + 1):
             if self.tree[i] is not None:
                 node = self.tree[i]
@@ -984,8 +974,7 @@ class SplayTree(SelfBalancingBinaryTree):
         if e is None:
             return
         self.splay(e, p)
-        status = super(SelfBalancingBinaryTree, self).delete(x)
-        return status
+        return super(SelfBalancingBinaryTree, self).delete(x)
 
     def join(self, other):
         """
@@ -1103,12 +1092,7 @@ class RedBlackTree(SelfBalancingBinaryTree):
         if parent_idx is None:
             return None
         node = self.tree[parent_idx]
-        if node_idx==node.left:
-            sibling_idx=node.right
-            return sibling_idx
-        else:
-            sibling_idx=node.left
-            return sibling_idx
+        return node.right if node_idx==node.left else node.left
 
     def _get_uncle(self, node_idx):
         parent_idx=self._get_parent(node_idx)
@@ -1116,14 +1100,10 @@ class RedBlackTree(SelfBalancingBinaryTree):
 
     def _is_onleft(self, node_idx):
         parent = self._get_parent(node_idx)
-        if self.tree[parent].left == node_idx:
-            return True
-        return False
+        return self.tree[parent].left == node_idx
 
     def _is_onright(self, node_idx):
-        if self._is_onleft(node_idx) is False:
-            return True
-        return False
+        return self._is_onleft(node_idx) is False
 
     def __fix_insert(self, node_idx):
         while self._get_parent(node_idx) is not None and \
@@ -1195,44 +1175,41 @@ class RedBlackTree(SelfBalancingBinaryTree):
             self.tree[node_idx1].data = self.tree[node_idx2].data
 
     def _has_one_child(self, node_idx):
-        if self._is_leaf(node_idx) is False and self._has_two_child(node_idx) is False:
-            return True
-        return False
+        return (
+            self._is_leaf(node_idx) is False
+            and self._has_two_child(node_idx) is False
+        )
 
     def _is_leaf(self, node_idx):
-        if self.tree[node_idx].left is None and self.tree[node_idx].right is None:
-            return True
-        return False
+        return self.tree[node_idx].left is None and self.tree[node_idx].right is None
 
     def _has_two_child(self, node_idx):
-        if self.tree[node_idx].left is not None and self.tree[node_idx].right is not None:
-            return True
-        return False
+        return (
+            self.tree[node_idx].left is not None
+            and self.tree[node_idx].right is not None
+        )
 
     def __has_red_child(self, node_idx):
         left_idx = self.tree[node_idx].left
         right_idx = self.tree[node_idx].right
-        if (left_idx is not None and self.tree[left_idx].color == 1) or \
-            (right_idx is not None and self.tree[right_idx].color == 1):
-            return True
-        return False
+        return (left_idx is not None and self.tree[left_idx].color == 1) or (
+            right_idx is not None and self.tree[right_idx].color == 1
+        )
 
     def _replace_node(self, node_idx):
         if self._is_leaf(node_idx):
             return None
         elif self._has_one_child(node_idx):
-            if self.tree[node_idx].left is not None:
-                child = self.tree[node_idx].left
-            else:
-                child = self.tree[node_idx].right
-            return child
+            return (
+                self.tree[node_idx].left
+                if self.tree[node_idx].left is not None
+                else self.tree[node_idx].right
+            )
         else:
             return self._find_predecessor(self.tree[node_idx].left)
 
     def __walk1_walk_isblack(self, color, node_idx1):
-        if (node_idx1 is None or self.tree[node_idx1].color == 0) and (color == 0):
-            return True
-        return False
+        return (node_idx1 is None or self.tree[node_idx1].color == 0) and color == 0
 
     def __left_left_siblingcase(self, node_idx):
         left_idx = self.tree[node_idx].left
@@ -1293,16 +1270,15 @@ class RedBlackTree(SelfBalancingBinaryTree):
                         self.tree[self.root_idx].is_root = False
                         left_idx = self.tree[sibling_idx].left
                         if self.tree[sibling_idx].left is not None and \
-                            self.tree[left_idx].color == 1:
+                                self.tree[left_idx].color == 1:
                             if self._is_onleft(sibling_idx):
                                 self.__left_left_siblingcase(sibling_idx)
                             else:
                                 self.__right_left_siblingcase(sibling_idx)
+                        elif self._is_onleft(sibling_idx):
+                            self.__left_right_siblingcase(sibling_idx)
                         else:
-                            if self._is_onleft(sibling_idx):
-                                self.__left_right_siblingcase(sibling_idx)
-                            else:
-                                self.__right_right_siblingcase(sibling_idx)
+                            self.__right_right_siblingcase(sibling_idx)
                         self.tree[self.root_idx].is_root = True
                         self.tree[parent_idx].color = 0
                     else:
@@ -1344,10 +1320,10 @@ class RedBlackTree(SelfBalancingBinaryTree):
         walk = node_idx
         walk1 = node_idx1
         parent = self._get_parent(node_idx)
-        color = self.tree[walk].color
         if parent is None:
             self._delete_root(walk, walk1)
         else:
+            color = self.tree[walk].color
             if self.__walk1_walk_isblack(color, walk1):
                 self.__fix_deletion(walk)
             else:
@@ -1389,17 +1365,16 @@ class RedBlackTree(SelfBalancingBinaryTree):
 
     def delete(self, key, **kwargs):
         walk = super(RedBlackTree, self).search(key)
-        if walk is not None:
-            walk1 = self._replace_node(walk)
-            if self._has_two_child(walk):
-                walk, walk1 = self.__two_child_case(walk)
-            if self._is_leaf(walk):
-                self.__leaf_case(walk, walk1)
-            elif self._has_one_child(walk):
-                self.__one_child_case(walk, walk1)
-            return True
-        else:
+        if walk is None:
             return None
+        walk1 = self._replace_node(walk)
+        if self._has_two_child(walk):
+            walk, walk1 = self.__two_child_case(walk)
+        if self._is_leaf(walk):
+            self.__leaf_case(walk, walk1)
+        elif self._has_one_child(walk):
+            self.__one_child_case(walk, walk1)
+        return True
 
 class BinaryTreeTraversal(object):
     """
@@ -1458,7 +1433,7 @@ class BinaryTreeTraversal(object):
         raise_if_backend_is_not_python(
             cls, kwargs.get('backend', Backend.PYTHON))
         if not isinstance(tree, BinaryTree):
-            raise TypeError("%s is not a binary tree"%(tree))
+            raise TypeError(f"{tree} is not a binary tree")
         obj = object.__new__(cls)
         obj.tree = tree
         return obj
@@ -1561,7 +1536,7 @@ class BinaryTreeTraversal(object):
                 "%s order is not implemented yet."
                 "We only support `in_order`, `post_order`, "
                 "`pre_order` and `out_order` traversals.")
-        return getattr(self, '_' + order)(node)
+        return getattr(self, f'_{order}')(node)
 
     def breadth_first_search(self, node=None, strategy='queue'):
         """
@@ -1587,8 +1562,7 @@ class BinaryTreeTraversal(object):
         # TODO: IMPLEMENT ITERATIVE DEEPENING-DEPTH FIRST SEARCH STRATEGY
         strategies = ('queue',)
         if strategy not in strategies:
-            raise NotImplementedError(
-                "%s startegy is not implemented yet"%(strategy))
+            raise NotImplementedError(f"{strategy} startegy is not implemented yet")
         if node is None:
             node = self.tree.root_idx
         q, visit, tree = Queue(), [], self.tree.tree
@@ -1669,16 +1643,12 @@ class BinaryIndexedTree(object):
         _index, _value = index, value
         if self.flag[index] == 0:
             self.flag[index] = 1
-            index += 1
-            while index < self.array._size + 1:
-                self.tree[index] += value
-                index = index + (index & (-index))
         else:
             value = value - self.array[index]
-            index += 1
-            while index < self.array._size + 1:
-                self.tree[index] += value
-                index = index + (index & (-index))
+        index += 1
+        while index < self.array._size + 1:
+            self.tree[index] += value
+            index += index & (-index)
         self.array[_index] = _value
 
     def get_prefix_sum(self, index):
@@ -1701,7 +1671,7 @@ class BinaryIndexedTree(object):
         sum = 0
         while index > 0:
             sum += self.tree[index]
-            index = index - (index & (-index))
+            index -= index & (-index)
         return sum
 
     def get_sum(self, left_index, right_index):

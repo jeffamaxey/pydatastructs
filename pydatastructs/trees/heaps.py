@@ -88,7 +88,7 @@ class DHeap(Heap):
         elif heap_property == "max":
             obj._comp = lambda key_parent, key_child: key_parent >= key_child
         else:
-            raise ValueError("%s is invalid heap property"%(heap_property))
+            raise ValueError(f"{heap_property} is invalid heap property")
         if elements is None:
             elements = DynamicOneDimensionalArray(TreeNode, 0)
         elif _check_type(elements, (list,tuple)):
@@ -167,9 +167,8 @@ class DHeap(Heap):
             parent = (i - 1)//self.d
             if i == 0 or self._comp(self.heap[parent].key, self.heap[i].key):
                 break
-            else:
-                self._swap(i, parent)
-                i = parent
+            self._swap(i, parent)
+            i = parent
 
     def extract(self):
         """
@@ -187,16 +186,15 @@ class DHeap(Heap):
         """
         if self._last_pos_filled == -1:
             raise IndexError("Heap is empty.")
-        else:
-            element_to_be_extracted = TreeNode(self.heap[0].key, self.heap[0].data)
-            self._swap(0, self._last_pos_filled)
-            self.heap.delete(self._last_pos_filled)
-            self._last_pos_filled -= 1
-            self._heapify(0)
-            return element_to_be_extracted
+        element_to_be_extracted = TreeNode(self.heap[0].key, self.heap[0].data)
+        self._swap(0, self._last_pos_filled)
+        self.heap.delete(self._last_pos_filled)
+        self._last_pos_filled -= 1
+        self._heapify(0)
+        return element_to_be_extracted
 
     def __str__(self):
-        to_be_printed = ['' for i in range(self._last_pos_filled + 1)]
+        to_be_printed = ['' for _ in range(self._last_pos_filled + 1)]
         for i in range(self._last_pos_filled + 1):
             node = self.heap[i]
             if node._leftmost <= self._last_pos_filled:
@@ -276,8 +274,7 @@ class BinaryHeap(DHeap):
                 **kwargs):
         raise_if_backend_is_not_python(
             cls, kwargs.get('backend', Backend.PYTHON))
-        obj = DHeap.__new__(cls, elements, heap_property, 2)
-        return obj
+        return DHeap.__new__(cls, elements, heap_property, 2)
 
     @classmethod
     def methods(cls):
@@ -346,8 +343,7 @@ class TernaryHeap(DHeap):
                 **kwargs):
         raise_if_backend_is_not_python(
             cls, kwargs.get('backend', Backend.PYTHON))
-        obj = DHeap.__new__(cls, elements, heap_property, 3)
-        return obj
+        return DHeap.__new__(cls, elements, heap_property, 3)
 
     @classmethod
     def methods(cls):
@@ -420,17 +416,16 @@ class BinomialHeap(Heap):
         tree2: BinomialTree
         """
         if (not _check_type(tree1, BinomialTree)) or \
-            (not _check_type(tree2, BinomialTree)):
+                (not _check_type(tree2, BinomialTree)):
             raise TypeError("Both the trees should be of type "
                             "BinomalTree.")
         ret_value = None
         if tree1.root.key <= tree2.root.key:
             tree1.add_sub_tree(tree2)
-            ret_value = tree1
+            return tree1
         else:
             tree2.add_sub_tree(tree1)
-            ret_value = tree2
-        return ret_value
+            return tree2
 
     def _merge_heap_last_new_tree(self, new_root_list, new_tree):
         """
@@ -456,7 +451,7 @@ class BinomialHeap(Heap):
         new_root_list = []
         i, j = 0, 0
         while (i < len(self.root_list)) and \
-              (j < len(other_heap.root_list)):
+                  (j < len(other_heap.root_list)):
             new_tree = None
             while self.root_list[i] is None:
                 i += 1
@@ -467,13 +462,12 @@ class BinomialHeap(Heap):
                                            other_heap.root_list[j])
                 i += 1
                 j += 1
+            elif self.root_list[i].order < other_heap.root_list[j].order:
+                new_tree = self.root_list[i]
+                i += 1
             else:
-                if self.root_list[i].order < other_heap.root_list[j].order:
-                    new_tree = self.root_list[i]
-                    i += 1
-                else:
-                    new_tree = other_heap.root_list[j]
-                    j += 1
+                new_tree = other_heap.root_list[j]
+                j += 1
             self._merge_heap_last_new_tree(new_root_list, new_tree)
 
         while i < len(self.root_list):
@@ -531,10 +525,11 @@ class BinomialHeap(Heap):
         Deletes the node with minimum key.
         """
         min_node, min_idx = self.find_minimum(get_index=True)
-        child_root_list = []
-        for k, child in enumerate(min_node.children):
-            if child is not None:
-                child_root_list.append(BinomialTree(root=child, order=k))
+        child_root_list = [
+            BinomialTree(root=child, order=k)
+            for k, child in enumerate(min_node.children)
+            if child is not None
+        ]
         self.root_list.remove(self.root_list[min_idx])
         child_heap = BinomialHeap(root_list=child_root_list)
         self.merge(child_heap)

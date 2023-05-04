@@ -8,9 +8,11 @@ def _list_files(checker):
                 os.pardir, os.pardir))
     code_files = []
     for (dirpath, _, filenames) in os.walk(root_path):
-        for _file in filenames:
-            if checker(_file):
-                code_files.append(os.path.join(dirpath, _file))
+        code_files.extend(
+            os.path.join(dirpath, _file)
+            for _file in filenames
+            if checker(_file)
+        )
     return code_files
 
 checker = lambda _file: (re.match(r".*\.py$", _file) or
@@ -23,17 +25,15 @@ def test_trailing_white_spaces():
                  "end with white spaces.")]
     msg = "{}:{}"
     for file_path in code_files:
-        file = open(file_path, "r")
-        line = file.readline()
-        line_number = 1
-        while line != "":
-            if line.endswith(" \n") or line.endswith("\t\n") \
-                or line.endswith(" ") or line.endswith("\t"):
-                messages.append(msg.format(file_path, line_number))
+        with open(file_path, "r") as file:
             line = file.readline()
-            line_number += 1
-        file.close()
-
+            line_number = 1
+            while line != "":
+                if line.endswith(" \n") or line.endswith("\t\n") \
+                    or line.endswith(" ") or line.endswith("\t"):
+                    messages.append(msg.format(file_path, line_number))
+                line = file.readline()
+                line_number += 1
     if len(messages) > 1:
         assert False, '\n'.join(messages)
 
@@ -43,19 +43,17 @@ def test_final_new_lines():
     msg1 = "No new line in {}:{}"
     msg2 = "More than one new line in {}:{}"
     for file_path in code_files:
-        file = open(file_path, "r")
-        lines = []
-        line = file.readline()
-        while line != "":
-            lines.append(line)
+        with open(file_path, "r") as file:
+            lines = []
             line = file.readline()
-        if lines:
-            if lines[-1][-1] != "\n":
-                messages.append(msg1.format(file_path, len(lines)))
-            if lines[-1] == "\n" and lines[-2][-1] == "\n":
-                messages.append(msg2.format(file_path, len(lines)))
-        file.close()
-
+            while line != "":
+                lines.append(line)
+                line = file.readline()
+            if lines:
+                if lines[-1][-1] != "\n":
+                    messages.append(msg1.format(file_path, len(lines)))
+                if lines[-1] == "\n" and lines[-2][-1] == "\n":
+                    messages.append(msg2.format(file_path, len(lines)))
     if len(messages) > 1:
         assert False, '\n'.join(messages)
 
@@ -68,21 +66,19 @@ def test_comparison_True_False_None():
     py_files = _list_files(checker)
     for file_path in py_files:
         if file_path.find("test_code_quality.py") == -1:
-            file = open(file_path, "r")
-            line = file.readline()
-            line_number = 1
-            while line != "":
-                if ((line.find("== True") != -1) or
-                    (line.find("== False") != -1) or
-                    (line.find("== None") != -1) or
-                    (line.find("!= True") != -1) or
-                    (line.find("!= False") != -1) or
-                    (line.find("!= None") != -1)):
-                    messages.append(msg.format(file_path, line_number))
+            with open(file_path, "r") as file:
                 line = file.readline()
-                line_number += 1
-            file.close()
-
+                line_number = 1
+                while line != "":
+                    if ((line.find("== True") != -1) or
+                        (line.find("== False") != -1) or
+                        (line.find("== None") != -1) or
+                        (line.find("!= True") != -1) or
+                        (line.find("!= False") != -1) or
+                        (line.find("!= None") != -1)):
+                        messages.append(msg.format(file_path, line_number))
+                    line = file.readline()
+                    line_number += 1
     if len(messages) > 1:
         assert False, '\n'.join(messages)
 
@@ -101,29 +97,27 @@ def test_reinterpret_cast():
                  " to cast pointers from one type to another")]
     msg = "Casting to {} at {}:{}"
     for file_path in cpp_files:
-        file = open(file_path, "r")
-        line = file.readline()
-        line_number = 1
-        while line != "":
-            found_open = False
-            between_open_close = ""
-            for char in line:
-                if char == '(':
-                    found_open = True
-                elif char == ')':
-                    if (between_open_close and
-                        between_open_close[-1] == '*' and
-                        is_variable(between_open_close[:-1])):
-                        messages.append(msg.format(between_open_close[:-1],
-                                                   file_path, line_number))
-                    between_open_close = ""
-                    found_open = False
-                elif char != ' ' and found_open:
-                    between_open_close += char
+        with open(file_path, "r") as file:
             line = file.readline()
-            line_number += 1
-        file.close()
-
+            line_number = 1
+            while line != "":
+                found_open = False
+                between_open_close = ""
+                for char in line:
+                    if char == '(':
+                        found_open = True
+                    elif char == ')':
+                        if (between_open_close and
+                            between_open_close[-1] == '*' and
+                            is_variable(between_open_close[:-1])):
+                            messages.append(msg.format(between_open_close[:-1],
+                                                       file_path, line_number))
+                        between_open_close = ""
+                        found_open = False
+                    elif char != ' ' and found_open:
+                        between_open_close += char
+                line = file.readline()
+                line_number += 1
     if len(messages) > 1:
         assert False, '\n'.join(messages)
 
@@ -132,16 +126,14 @@ def test_presence_of_tabs():
                  "use tabs instead of spaces.")]
     msg = "{}:{}"
     for file_path in code_files:
-        file = open(file_path, "r")
-        line_number = 1
-        line = file.readline()
-        while line != "":
-            if (line.find('\t') != -1):
-                messages.append(msg.format(file_path, line_number))
+        with open(file_path, "r") as file:
+            line_number = 1
             line = file.readline()
-            line_number += 1
-        file.close()
-
+            while line != "":
+                if (line.find('\t') != -1):
+                    messages.append(msg.format(file_path, line_number))
+                line = file.readline()
+                line_number += 1
     if len(messages) > 1:
         assert False, '\n'.join(messages)
 

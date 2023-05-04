@@ -185,7 +185,7 @@ def brick_sort(array, **kwargs):
     comp = kwargs.get("comp", lambda u, v: u <= v)
 
     is_sorted = False
-    while is_sorted is False:
+    while not is_sorted:
         is_sorted = True
         for i in range(start+1, end, 2):
             if _comp(array[i+1], array[i], comp):
@@ -421,10 +421,7 @@ def counting_sort(array: Array, **kwargs) -> Array:
     return output
 
 def _matrix_multiply_helper(m1, m2, row, col):
-    s = 0
-    for i in range(len(m1)):
-        s += m1[row][i] * m2[i][col]
-    return s
+    return sum(m1[row][i] * m2[i][col] for i in range(len(m1)))
 
 def matrix_multiply_parallel(matrix_1, matrix_2, num_threads):
     """
@@ -477,7 +474,7 @@ def matrix_multiply_parallel(matrix_1, matrix_2, num_threads):
         raise ValueError("Matrix size mismatch: %s * %s"%(
         (row_matrix_1, col_matrix_1), (row_matrix_2, col_matrix_2)))
 
-    C = [[None for i in range(col_matrix_1)] for j in range(row_matrix_2)]
+    C = [[None for _ in range(col_matrix_1)] for _ in range(row_matrix_2)]
 
     with ThreadPoolExecutor(max_workers=num_threads) as Executor:
         for i in range(row_matrix_1):
@@ -852,11 +849,10 @@ def longest_common_subsequence(seq1: OneDimensionalArray, seq2: OneDimensionalAr
                 temp = check_mat[i-1][j-1][1][:]
                 temp.append(seq1[i-1])
                 check_mat[i][j] = (check_mat[i-1][j-1][0] + 1, temp)
+            elif check_mat[i-1][j][0] > check_mat[i][j-1][0]:
+                check_mat[i][j] = check_mat[i-1][j]
             else:
-                if check_mat[i-1][j][0] > check_mat[i][j-1][0]:
-                    check_mat[i][j] = check_mat[i-1][j]
-                else:
-                    check_mat[i][j] = check_mat[i][j-1]
+                check_mat[i][j] = check_mat[i][j-1]
 
     return OneDimensionalArray(seq1._dtype, check_mat[row][col][-1])
 
@@ -1159,7 +1155,7 @@ def _permutation_util(array, start, end, comp, perm_comp):
         permute[left], permute[right] = permute[right], permute[left]
         left += 1
         right -= 1
-    result =  True if i > 0 else False
+    result = i > 0
     return result, permute
 
 def next_permutation(array, **kwargs):
@@ -1227,10 +1223,7 @@ def next_permutation(array, **kwargs):
     comp = kwargs.get('comp', lambda x, y: x < y)
 
     def _next_permutation_comp(x, y, _comp):
-        if _comp(x, y):
-            return False
-        else:
-            return True
+        return not _comp(x, y)
 
     return _permutation_util(array, start, end, comp,
                              _next_permutation_comp)
@@ -1300,10 +1293,7 @@ def prev_permutation(array, **kwargs):
     comp = kwargs.get('comp', lambda x, y: x < y)
 
     def _prev_permutation_comp(x, y, _comp):
-        if _comp(x, y):
-            return True
-        else:
-            return False
+        return bool(_comp(x, y))
 
     return _permutation_util(array, start, end, comp,
                              _prev_permutation_comp)
@@ -1367,7 +1357,7 @@ def bubble_sort(array, **kwargs):
     end = kwargs.get('end', len(array) - 1)
     comp = kwargs.get("comp", lambda u, v: u <= v)
     arr_len = len(array)
-    for i in range(arr_len - 1):
+    for _ in range(arr_len - 1):
         for j in range(start , end):
             if not _comp(array[j], array[j + 1], comp):
                 array[j], array[j + 1] = array[j + 1], array[j]
@@ -1572,11 +1562,7 @@ def linear_search(array, value, **kwargs):
     start = kwargs.get('start', 0)
     end = kwargs.get('end', len(array) - 1)
 
-    for i in range(start, end + 1):
-        if array[i] == value:
-            return i
-
-    return None
+    return next((i for i in range(start, end + 1) if array[i] == value), None)
 
 def binary_search(array, value, **kwargs):
     """
